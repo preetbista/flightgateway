@@ -1,0 +1,43 @@
+server:
+  port: 8999
+
+eureka:
+  instance:
+    hostname: localhost
+
+spring:
+  application:
+    name: flight-gateway
+  cloud:
+    gateway:
+      routes:
+        - id: flight-service
+          uri: lb://flight-service
+          predicates:
+            - Path=/users/**, /cabins/**, /book-ticket/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: flight-service
+                fallBackUri: forward:/flightServiceFallback
+
+
+        - id: passenger-service
+          uri: lb://passenger-service
+          predicates:
+            - Path=/passenger-info/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: passenger-service
+                fallBackUri: forward:/passengerServiceFallback
+
+        - id: contact-service
+          uri: lb://contact-service
+          predicates:
+            - Path=/contact/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: contact-service
+                fallBackUri: forward:/contactServiceFallback
